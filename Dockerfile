@@ -1,4 +1,4 @@
-FROM golang:1.9
+FROM golang:1.9-alpine
 LABEL maintainer "terje@offpiste.org"
 
 ENV INFLUXDB_URL=http://influxdb:8086/
@@ -11,13 +11,15 @@ EXPOSE 9201
 
 COPY run.sh /
 
-RUN mkdir -p /go/src/github.com/prometheus && \
+RUN apk add --no-cache git && \
+    mkdir -p /go/src/github.com/prometheus && \
     cd /go/src/github.com/prometheus && \
     git clone https://github.com/prometheus/prometheus.git && \
     cd /go/src/github.com/prometheus/prometheus/documentation/examples/remote_storage/remote_storage_adapter && \
     go-wrapper download && \
     go-wrapper install && \
     cd / && \
-    rm -rf /go/src/github.com
+    apk del git && \
+    rm -rf /go/src/github.com /var/cache/apk
 
 CMD ["/run.sh"]
